@@ -1,5 +1,6 @@
-#include "../include/cache.hpp"
 #include <iostream>
+
+#include "cache.hpp"
 
 int main()
 {
