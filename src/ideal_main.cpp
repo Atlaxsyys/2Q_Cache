@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
 #include "ideal_cache.hpp"
 
 int main()
@@ -10,8 +9,7 @@ int main()
     std::cin >> capacity >> count;
 
     std::vector<int> sequence(count);
-
-    for (std::size_t i = 0; i < count; i++)
+    for (std::size_t i = 0; i < count; ++i)
     {
         std::cin >> sequence[i];
     }
@@ -22,7 +20,7 @@ int main()
     for (std::size_t i = 0; i < count; ++i)
     {
         int key = sequence[i];
-        if (!cache.get(key, value, i))
+        if (!cache.get(key, value, i)) 
         {
             value = std::to_string(key);
             std::cout << "\n\nWORK" << std::endl;

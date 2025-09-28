@@ -105,16 +105,17 @@ public:
         ++hits_;
         return true;
     }
-else if (type == 'o')
-{
-    A1out_.erase(iterators_[key]); // Удаляем из A1out первым
-    types_.erase(key);             // Удаляем тип
-    reclaimFor(key);               // Освобождаем место, если нужно
-    Am_.push_front(key);           // Добавляем в Am
-    iterators_[key] = Am_.begin(); // Обновляем итератор
-    types_[key] = 'm';             // Меняем тип
-    return false;                  // Значение не было в кэше
-}
+    else if (type == 'o')
+    {
+        // Promote from A1out to Am
+        A1out_.erase(iterators_[key]);
+        types_.erase(key);
+        reclaimFor(key);
+        Am_.push_front(key);
+        iterators_[key] = Am_.begin();
+        types_[key] = 'm';
+        return false; // Value not in cache yet
+    }
 
     return false;
 }
@@ -228,7 +229,6 @@ else if (type == 'o')
     }
 
     std::cout << "\nTypes:" << std::endl;
-
     {
         auto it = types_.begin();
         auto end = types_.end();
