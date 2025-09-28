@@ -25,6 +25,8 @@ private:
     std::unordered_map<Key, ListIterator> iterators_; // key -> position
     std::unordered_map<Key, char> types_;            // 'i' - A1in, 'm' - Am, 'o' - A1out
 
+    std::size_t hits_ = 0;
+
     void reclaimFor(const Key& key)
     {
         if (values_.size() < capacity_)
@@ -71,51 +73,51 @@ public:
           kin_(kin == 0 ? capacity / 4 : kin),
           kout_(kout == 0 ? capacity / 2 : kout)
     {
-        if (capacity_ == 0)   { throw std::invalid_argument("Cache capacity must be greater than 0");  }
+        if (capacity_ == 0)   { throw std::invalid_argument("Cache capacity must be greater than 0" ); }
         if (kin_ > capacity_) { throw std::invalid_argument("A1in size (kin) cannot exceed capacity"); }
     }
 
     bool get(const Key& key, Value& value)
+{
+    auto type_it = types_.find(key);
+    
+    if (type_it == types_.end())
     {
-        auto type_it = types_.find(key);
-        
-        if (type_it == types_.end())
-        {
-            return false; // Key not found
-        }
-
-        char type = type_it->second;
-        
-        if (type == 'm')
-        {
-            // Move to front of Am
-            Am_.erase(iterators_[key]);
-            Am_.push_front(key);
-            iterators_[key] = Am_.begin();
-            value = values_[key];
-            return true;
-        }
-
-        else if (type == 'i')
-        {
-            // Stay in A1in
-            value = values_[key];
-            return true;
-        }
-        
-        else if (type == 'o')
-        {
-            // Promote from A1out to Am
-            reclaimFor(key);
-            A1out_.erase(iterators_[key]);
-            types_.erase(key);
-            Am_.push_front(key);
-            iterators_[key] = Am_.begin();
-            types_[key] = 'm';
-            return false; // Value not in cache yet
-        }
-        return false;
+        return false; // Key not found
     }
+
+    char type = type_it->second;
+    
+    if (type == 'm')
+    {
+        // Move to front of Am
+        Am_.erase(iterators_[key]);
+        Am_.push_front(key);
+        iterators_[key] = Am_.begin();
+        value = values_[key];
+        ++hits_;
+        return true;
+    }
+    else if (type == 'i')
+    {
+        // Stay in A1in
+        value = values_[key];
+        ++hits_;
+        return true;
+    }
+else if (type == 'o')
+{
+    A1out_.erase(iterators_[key]); // Удаляем из A1out первым
+    types_.erase(key);             // Удаляем тип
+    reclaimFor(key);               // Освобождаем место, если нужно
+    Am_.push_front(key);           // Добавляем в Am
+    iterators_[key] = Am_.begin(); // Обновляем итератор
+    types_[key] = 'm';             // Меняем тип
+    return false;                  // Значение не было в кэше
+}
+
+    return false;
+}
 
     void put(const Key& key, const Value& value)
     {
@@ -160,15 +162,86 @@ public:
         values_[key] = value;
     }
 
-    std::size_t size() const
+    std::size_t get_hits() const { return hits_; }
+
+    std::size_t size() const { return values_.size();  }
+    bool empty()       const { return values_.empty(); }
+
+    void dump() const
     {
-        return values_.size();
+        std::cout << "------------------DUMP------------------" << std::endl;
+        std::cout << "\nCapacity: " << capacity_ << "\nKin: " << kin_  << "\nKout: " << kout_ << std::endl;
+
+        std::cout << "\nA1in (size " << A1in_.size() << "): ";
+        {
+            auto it = A1in_.begin();
+            auto end = A1in_.end();
+            int first = 1;
+            for (; it != end; ++it)
+            {
+                if (!first) std::cout << " ";
+                std::cout << *it;
+                first = 0;
+            }
+        }
+
+        std::cout << std::endl;
+
+        std::cout << "\n Am (size: " << Am_.size() << "): ";
+        {
+            auto it = Am_.begin();
+            auto end = Am_.end();
+            int first = 1;
+            for (; it != end; ++it)
+            {
+                if (!first) std::cout << " ";
+                std::cout << *it;
+                first = 0;
+            }
+        }
+
+        std::cout << std::endl;
+
+    std::cout << "A1out ( size " << A1out_.size() << "): ";
+    {
+        auto it = A1out_.begin();
+        auto end = A1out_.end();
+        int first = 1;
+        for (; it != end; ++it)
+        {
+            if (!first) std::cout << " ";
+            std::cout << *it;
+            first = 0;
+        }
     }
 
-    bool empty() const
+    std::cout << std::endl;
+
+    std::cout << "\nValues (only in cache):" << std::endl;
     {
-        return values_.empty();
+        auto it = values_.begin();
+        auto end = values_.end();
+        for (; it != end; ++it)
+        {
+            std::cout << "Key " << it->first << ": " << it->second << std::endl;
+        }
     }
+
+    std::cout << "\nTypes:" << std::endl;
+
+    {
+        auto it = types_.begin();
+        auto end = types_.end();
+        for (; it != end; ++it)
+        {
+            std::cout << "Key " << it->first << ": " << it->second << std::endl;
+        }
+    }
+
+    std::cout << "---------------------------------------" << std::endl;
+
+    }
+    
 };
 
 }

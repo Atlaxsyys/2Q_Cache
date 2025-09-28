@@ -4,23 +4,29 @@
 
 int main()
 {
-    cache::TwoQCache<int, std::string> cache(4); // create cache: Key=int, Value=string, capacity=4 (kin=1, kout=2)
-    cache.put(1, "one");   // added {1: "one"} в A1in
-    cache.put(2, "two");
+    std::size_t capacity = 0;
+    std::size_t count = 0;
+    std::cin >> capacity >> count;
+    cache::TwoQCache<int, std::string> cache(capacity);
 
     std::string value;
+    
+    for (std::size_t i = 0; i < count; i++)
+    {
+        int key = 0;
+        std::cin >> key;
 
-    if (cache.get(1, value)) { std::cout << "Key 1: " << value << std::endl; }
-
-    cache.put(3, "three");
-    cache.put(4, "four");
-    cache.put(5, "five");
-
-    if (!cache.get(2, value)) { std::cout << "Key 2 not found" << std::endl; }
-
-    cache.put(2, "two again");
-
-    std::cout << "Cache size: " << cache.size() << std::endl;
+        if (!cache.get(key, value))
+        {
+            value = std::to_string(key);
+            std::cout << "\n\nWORK" << std::endl;
+            cache.put(key, value);
+        }
+        
+        cache.dump();
+    }
+    
+    std::cout << "Hits: " << cache.get_hits() << std::endl;
 
     return 0;
 }
