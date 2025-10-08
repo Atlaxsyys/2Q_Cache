@@ -12,7 +12,6 @@ template<typename Key, typename Value>
 class ideal_cache {
     private:
     std::size_t capacity_;
-    std::size_t hits_ = 0;
 
     std::unordered_map<Key, Value> cache_;
     std::unordered_map<Key, std::vector<std::size_t>> future_positions_;
@@ -64,7 +63,6 @@ class ideal_cache {
 
         if (it != cache_.end())
         {
-            hits_++;
             value = it->second;
             current_pos_ = pos + 1;
             
@@ -76,44 +74,47 @@ class ideal_cache {
     }
 
     void put(const Key& key, const Value& value, std::size_t pos)
+{
+    if (next_use(key, pos) == (1ULL << 60))
     {
-        auto it = cache_.find(key);
-
-        if (it != cache_.end())
-        {
-            it->second = value;
-            current_pos_ = pos + 1;
-
-            return;
-        }
-
-        if (cache_.size() < capacity_)
-        {
-            cache_[key] = value;
-            current_pos_ = pos + 1;
-
-            return;
-        }
-
-        Key evict_key;
-        std::size_t max_distance = 0;
-        for (auto it = cache_.begin(); it != cache_.end(); it++)
-        {
-            std::size_t dist = next_use(it->first, pos);
-
-            if (dist > max_distance)
-            {
-                max_distance = dist;
-                evict_key = it->first;
-            }
-        }
-
-        cache_.erase(evict_key);
-        cache_[key] = value;
-        current_pos_ = pos + 1;
+        return;
     }
 
-    std::size_t get_hits() const { return hits_; }
+    auto it = cache_.find(key);
+
+    if (it != cache_.end())
+    {
+        it->second = value;
+        current_pos_ = pos + 1;
+        return;
+    }
+
+    if (cache_.size() < capacity_)
+    {
+        cache_[key] = value;
+        current_pos_ = pos + 1;
+        return;
+    }
+
+    Key evict_key;
+    std::size_t max_distance = 0;
+    
+    for (auto it = cache_.begin(); it != cache_.end(); it++)
+    {
+        std::size_t dist = next_use(it->first, pos);
+
+        if (dist > max_distance)
+        {
+            max_distance = dist;
+            evict_key = it->first;
+        }
+    }
+
+    cache_.erase(evict_key);
+    cache_[key] = value;
+    current_pos_ = pos + 1;
+}
+
 };
 
 }
