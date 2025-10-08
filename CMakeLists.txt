@@ -10,10 +10,10 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${INCLUDE_DIR})
 
-add_executable(cache_test ${SOURCE_DIR}/main.cpp)
-add_executable(ideal_test ${SOURCE_DIR}/ideal_main.cpp)
-target_include_directories(cache_test PRIVATE ${INCLUDE_DIR})
-target_include_directories(ideal_test PRIVATE ${INCLUDE_DIR})
+add_executable(cache_2q ${SOURCE_DIR}/main_2q.cpp)
+add_executable(cache_ideal ${SOURCE_DIR}/main_ideal.cpp)
+target_include_directories(cache_2q PRIVATE ${INCLUDE_DIR})
+target_include_directories(cache_ideal PRIVATE ${INCLUDE_DIR})
 
 #check OC && compiler
 message("Building on ${CMAKE_SYSTEM_NAME} with compiler ${CMAKE_CXX_COMPILER_ID}")

@@ -1,0 +1,40 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+#include "cache_ideal.hpp"
+
+int main()
+{
+    std::size_t capacity, count;
+    std::cin >> capacity >> count;
+
+    std::vector<int> sequence(count);
+    for (std::size_t i = 0; i < count; i++)
+    {
+        std::cin >> sequence[i];
+    }
+
+    cache::ideal_cache<int, std::string> cache(capacity, sequence);
+    std::string value;
+    std::size_t hits = 0;
+
+    for (std::size_t i = 0; i < count; i++)
+    {
+        int key = sequence[i];
+        if (cache.get(key, value, i))
+        {
+            hits++;
+        }
+
+        else
+        {
+            value = std::to_string(key);
+            cache.put(key, value, i);
+        }
+    }
+
+    std::cout << hits << std::endl;
+
+    return 0;
+}
