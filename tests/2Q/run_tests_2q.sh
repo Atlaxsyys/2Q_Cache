@@ -8,7 +8,7 @@ for i in {1..10}; do
         continue
     fi
 
-    actual=$(../../cache_2q < "${formatted_idx}.dat")
+    actual=$(../../build/cache_2q < "${formatted_idx}.dat")
     expected=$(cat "${formatted_idx}.sol")
     
     if [ "$actual" = "$expected" ]; then
