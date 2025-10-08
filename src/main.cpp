@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "ideal_cache.hpp"
+#include "cache.hpp"
 
 int main()
 {
@@ -10,27 +10,32 @@ int main()
     std::cin >> capacity >> count;
 
     std::vector<int> sequence(count);
-
-    for (std::size_t i = 0; i < count; i++)
+    for (std::size_t i = 0; i < count; ++i)
     {
         std::cin >> sequence[i];
     }
 
-    cache::ideal_cache<int, std::string> cache(capacity, sequence);
+    cache::TwoQCache<int, std::string> cache(capacity);
+
+    std::size_t hits = 0;
     std::string value;
 
     for (std::size_t i = 0; i < count; ++i)
     {
         int key = sequence[i];
-        if (!cache.get(key, value, i))
+
+        if (cache.get(key, value))
+        {
+            hits++;
+        }
+
+        else
         {
             value = std::to_string(key);
-            std::cout << "\n\nWORK" << std::endl;
-            cache.put(key, value, i);
+            cache.put(key, value);
         }
     }
 
-    std::cout << "Hits: " << cache.get_hits() << std::endl;
-
+    std::cout << hits << std::endl;
     return 0;
 }
