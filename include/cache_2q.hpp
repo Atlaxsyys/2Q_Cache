@@ -62,17 +62,20 @@ private:
     }
 
 public:
-    TwoQCache(std::size_t capacity, double kin_ratio = 0.20, double kout_ratio = 0.60)
-        : capacity_(capacity)
+    TwoQCache(std::size_t capacity) : capacity_(capacity)
     {
         if (capacity < 2)
         {
             throw std::invalid_argument("Cache capacity must be >= 2");
         }
-        
+
+        double kin_ratio = 0.20;
+        double kout_ratio = 0.60;
+        double km_ratio = 0.20;
+
         kin_ = std::max<std::size_t>(1, static_cast<std::size_t>(capacity * kin_ratio));
         kout_ = std::max<std::size_t>(1, static_cast<std::size_t>(capacity * kout_ratio));
-        km_ = std::max<std::size_t>(1, static_cast<std::size_t>(capacity * 0.20));
+        km_ = std::max<std::size_t>(1, static_cast<std::size_t>(capacity * km_ratio));
     }
 
     bool get(const Key& key, Value& value)
